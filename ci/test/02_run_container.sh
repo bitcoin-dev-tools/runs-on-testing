@@ -11,8 +11,8 @@ set -o errexit -o pipefail -o xtrace
 
 if [ -z "$DANGER_RUN_CI_ON_HOST" ]; then
   # Export all env vars to avoid missing some.
-  # Though, exclude those with newlines to avoid parsing problems.
-  python3 -c 'import os; [print(f"{key}={value}") for key, value in os.environ.items() if "\n" not in value and "HOME" != key and "PATH" != key and "USER" != key]' | tee "/tmp/env-$USER-$CONTAINER_NAME"
+  # Though, exclude those with newlines or that don't have a key *and* value, to avoid parsing problems.
+  python3 -c 'import os; [print(f"{key}={value}") for key, value in os.environ.items() if "\n" not in value and "HOME" != key and "PATH" != key and "USER" != key and not "runs-on" in value]' | tee "/tmp/env-$USER-$CONTAINER_NAME"
 
   # Env vars during the build can not be changed. For example, a modified
   # $MAKEJOBS is ignored in the build process. Use --cpuset-cpus as an
