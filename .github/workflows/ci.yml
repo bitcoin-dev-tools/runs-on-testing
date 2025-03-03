@@ -268,8 +268,7 @@ jobs:
     # has to match container in ci/test/00_setup_env_native_asan.sh for tracing tools
     runs-on:
       - runs-on=${{ github.run_id }}
-      - runner=8cpu-linux-x64
-      - image=ubuntu24-full-x64
+      - runner=fast-x64-ubuntu24
     if: ${{ vars.SKIP_BRANCH_PUSH != 'true' || github.event_name == 'pull_request' }}
     timeout-minutes: 120
     env:
