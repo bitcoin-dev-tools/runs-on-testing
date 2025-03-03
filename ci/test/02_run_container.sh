@@ -46,8 +46,26 @@ if [ -z "$DANGER_RUN_CI_ON_HOST" ]; then
     DOCKER_BUILD_CACHE_ARG="--cache-from type=local,src=${DOCKER_BUILD_CACHE_OLD_DIR} --cache-to type=local,dest=${DOCKER_BUILD_CACHE_NEW_DIR},mode=max"
   fi
 
+  # Default docker command
+  DOCKER_CMD="docker"
+  # If we want to use the GHA caching layer, create a new builder and use it by
+  # updating the docker command
+  if [ "$DOCKER_BUILDER_GHA" ]; then
+    # Create a new builder instance for GHA caching support
+    BUILDER_NAME="bitcoin-builder-${CONTAINER_NAME}"
+    # Remove any existing builder with the same name
+    docker buildx rm "${BUILDER_NAME}" 2>/dev/null || true
+    # Create a new builder
+    docker buildx create --name "${BUILDER_NAME}" --use --driver-opt default-load=true
+    # Set the cache to use GHA backend.
+    # This wil use the S3 bucket on runs-on
+    DOCKER_BUILD_CACHE_ARG="--cache-to type=gha --cache-from type=gha,mode=max"
+    # Using buildx will use the configured builder
+    DOCKER_CMD="docker buildx"
+  fi
+
   # shellcheck disable=SC2086
-  DOCKER_BUILDKIT=1 docker build \
+  DOCKER_BUILDKIT=1 $DOCKER_CMD build \
       --file "${BASE_READ_ONLY_DIR}/ci/test_imagefile" \
       --build-arg "CI_IMAGE_NAME_TAG=${CI_IMAGE_NAME_TAG}" \
       --build-arg "FILE_ENV=${FILE_ENV}" \

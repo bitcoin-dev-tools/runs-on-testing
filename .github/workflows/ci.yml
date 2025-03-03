@@ -275,12 +275,15 @@ jobs:
       FILE_ENV: "./ci/test/00_setup_env_native_asan.sh"
       DANGER_CI_ON_HOST_FOLDERS: 1
     steps:
+      - uses: runs-on/action@v1
+
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Set CI directories
         run: |
           echo "CCACHE_DIR=${{ runner.temp }}/ccache_dir" >> "$GITHUB_ENV"
+          echo "DOCKER_BUILDER_GHA=1" >> "$GITHUB_ENV"
           echo "BASE_ROOT_DIR=${{ runner.temp }}" >> "$GITHUB_ENV"
           echo "BASE_BUILD_DIR=${{ runner.temp }}/build-asan" >> "$GITHUB_ENV"
 
