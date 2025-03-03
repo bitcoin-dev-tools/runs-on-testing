@@ -274,9 +274,8 @@ jobs:
     env:
       FILE_ENV: "./ci/test/00_setup_env_native_asan.sh"
       DANGER_CI_ON_HOST_FOLDERS: 1
+      GITHUB_REPOSITORY: ${{ github.repository }}
     steps:
-      - uses: runs-on/action@v1
-
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -289,7 +288,7 @@ jobs:
 
       - name: Restore Ccache cache
         id: ccache-cache
-        uses: actions/cache/restore@v4
+        uses: runs-on/cache/restore@v4
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ${{ github.job }}-ccache-${{ github.run_id }}
@@ -307,7 +306,7 @@ jobs:
           ./ci/test_run_all.sh
 
       - name: Save Ccache cache
-        uses: actions/cache/save@v4
+        uses: runs-on/cache/save@v4
         if: github.event_name != 'pull_request' && steps.ccache-cache.outputs.cache-hit != 'true'
         with:
           path: ${{ env.CCACHE_DIR }}

@@ -58,8 +58,10 @@ if [ -z "$DANGER_RUN_CI_ON_HOST" ]; then
     # Create a new builder
     docker buildx create --name "${BUILDER_NAME}" --use --driver-opt default-load=true
     # Set the cache to use GHA backend.
-    # This wil use the S3 bucket on runs-on
-    DOCKER_BUILD_CACHE_ARG="--cache-to type=gha --cache-from type=gha,mode=max"
+    # This will use the S3 bucket on runs-on provides
+    DOCKER_CACHE_FROM="--cache-from type=s3,blobs_prefix=cache/${GITHUB_REPOSITORY}/,manifests_prefix=cache/${GITHUB_REPOSITORY}/,region=${RUNS_ON_AWS_REGION},bucket=${RUNS_ON_S3_BUCKET_CACHE}"
+    DOCKER_CACHE_TO="--cache-from type=s3,blobs_prefix=cache/${GITHUB_REPOSITORY}/,manifests_prefix=cache/${GITHUB_REPOSITORY}/,region=${RUNS_ON_AWS_REGION},bucket=${RUNS_ON_S3_BUCKET_CACHE},mode=max"
+    DOCKER_BUILD_CACHE_ARG="${DOCKER_CACHE_FROM} ${DOCKER_CACHE_TO}"
     # Using buildx will use the configured builder
     DOCKER_CMD="docker buildx"
   fi
